@@ -1,197 +1,743 @@
-import { useState } from 'react';
-import { useRecords, q } from '@/lib/datasource';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTextSetting } from '@/lib/editable-settings';
-import { MessageCircle } from 'lucide-react';
+import { useState } from "react";
 
-const select = q.select({
-  name: '6wwmX',
-  status: 'a5vkW',
-  picture: 'fkqhG',
-  landSize: '1v36Y',
-});
+// ─────────────────────────────────────────────────────────────────────────────
+// ✏️  TO UPDATE YOUR LISTINGS:
+//    1. Open https://share.ecoprop.com/R006429J?VNK=28df66df in Chrome
+//    2. DevTools → Network → filter "queryAgentProjectList" → Response tab
+//    3. Copy the "lists" array and paste it here
+// ─────────────────────────────────────────────────────────────────────────────
+const LISTINGS = [
+  {
+    projectId: "eadec74ff2a84a8eb85de08de5bb4664",
+    projectName: "Sophia Meadow",
+    abbreviation: "Sophia-Meadow",
+    projectType: "Cluster Housing",
+    streetAddress: "132 Sophia Road",
+    location: "D09 - Orchard / River Valley",
+    district: "D09",
+    mainImage: "/upload/broke/25aa2d2624f54406b900cca81ccb30ae/eadec74ff2a84a8eb85de08de5bb4664/imgs/20260204/20f8045902b54c6296fcdf82d8104dd4.jpeg",
+    priceFromText: null, psfFromText: null, currencySymbol: "$",
+    launchDate: "TBC", completionDate: "2029-11-30 00:00:00",
+    projectStatus: "By BUC", isIvt: null, viewNum: 649,
+    propertyGroup: "D09, D10, D11, D21",
+  },
+  {
+    projectId: "eaf892dde8d345e7b8beea79e9851184",
+    projectName: "Pinery Residences",
+    abbreviation: "Pinery-Residences",
+    projectType: "Mixed-use Development",
+    streetAddress: "Tampines Street 94",
+    location: "D18 - Pasir Ris / Tampines",
+    district: "D18",
+    mainImage: "/upload/broke/25aa2d2624f54406b900cca81ccb30ae/eaf892dde8d345e7b8beea79e9851184/imgs/20260129/5f1f3cca5dc14a6b91aee493ed42b6ad.jpeg",
+    priceFromText: null, psfFromText: null, currencySymbol: "$",
+    launchDate: "TBC", completionDate: "TBC",
+    projectStatus: "By BUC", isIvt: null, viewNum: 17293,
+    propertyGroup: null,
+  },
+  {
+    projectId: "7bd78f57af654f7bb21c38428816ffce",
+    projectName: "Rivelle Tampines 悦湖轩",
+    abbreviation: "Rivelle-Tampines",
+    projectType: "Executive Condominium",
+    streetAddress: "51–71 Tampines Street 95",
+    location: "D18 - Pasir Ris / Tampines",
+    district: "D18",
+    mainImage: "/upload/broke/347d7de60c1c4728ba7d01ee6ffdc5f8/7bd78f57af654f7bb21c38428816ffce/imgs/20260210/292bbb076a8b495a989004dc3ce79f9d.png",
+    priceFromText: null, psfFromText: null, currencySymbol: "$",
+    launchDate: "TBC", completionDate: "2030-06-30 00:00:00",
+    projectStatus: "By BUC", isIvt: null, viewNum: 12994,
+    propertyGroup: "D15 - D18",
+  },
+  {
+    projectId: "f387d063c6b84ee7837c5c9d4a0582d5",
+    projectName: "Gourmet Xchange",
+    abbreviation: "Gourmet-Xchange",
+    projectType: "B2 Food Industry",
+    streetAddress: "10 Kallang Way 5",
+    location: "D13 - Macpherson / Potong Pasir",
+    district: "D13",
+    mainImage: "/upload/broke/26a7e3532c1e40c493ccd4d1302549f3/f387d063c6b84ee7837c5c9d4a0582d5/imgs/20260115/9ccd2f3a47aa4cfc8d5080567bbb7b9a.jpeg",
+    priceFromText: null, psfFromText: null, currencySymbol: "$",
+    launchDate: "TBC", completionDate: "1H 2028",
+    projectStatus: "By BUC", isIvt: null, viewNum: 3993,
+    propertyGroup: "Industrial/Commercial",
+  },
+  {
+    projectId: "2bf756a1de0c47808e164704cb191232",
+    projectName: "River Modern 瑞河豪苑",
+    abbreviation: "River-Modern",
+    projectType: "Residential Highrise",
+    streetAddress: "River Valley Green",
+    location: "D09 - Orchard / River Valley",
+    district: "D09",
+    mainImage: "/upload/broke/25aa2d2624f54406b900cca81ccb30ae/2bf756a1de0c47808e164704cb191232/imgs/20251118/ee466a1618e6435589049d33d60531d8.jpeg",
+    priceFromText: null, psfFromText: null, currencySymbol: "$",
+    launchDate: "2026-03-07 00:00:00", completionDate: "2H 2030",
+    projectStatus: "By BUC", isIvt: 1, viewNum: 21586,
+    propertyGroup: "D09, D10, D11, D21",
+  },
+  {
+    projectId: "e80c8fc512304bd7b7969fcf96b00048",
+    projectName: "Hudson Place Residences",
+    abbreviation: "Hudson-Place-Residences",
+    projectType: "Residential Lowrise",
+    streetAddress: "Media Circle",
+    location: "D05 - Buona Vista / West Coast",
+    district: "D05",
+    mainImage: "/upload/broke/de0b7f8e27dc4ad0a99ac8a53c792778/e80c8fc512304bd7b7969fcf96b00048/imgs/20251023/4e998491a19f4a34b397559999f726d0.jpg",
+    priceFromText: null, psfFromText: null, currencySymbol: "$",
+    launchDate: "TBC", completionDate: "TBC",
+    projectStatus: "By BUC", isIvt: null, viewNum: 1703,
+    propertyGroup: "D01 - D08",
+  },
+  {
+    projectId: "02a030d8f3ca4ed1b2093e94e3b31115",
+    projectName: "Lentor Gardens Residences",
+    abbreviation: "Lentor-Gardens-Residences",
+    projectType: "Mixed Developments",
+    streetAddress: "Lentor Garden",
+    location: "D26 - Mandai / Upper Thomson",
+    district: "D26",
+    mainImage: "/upload/broke/d4009c115bc14e3298551010fb11dba6/02a030d8f3ca4ed1b2093e94e3b31115/imgs/20251030/96567079ada842858a28e3f39c9e18cc.jpg",
+    priceFromText: null, psfFromText: null, currencySymbol: "$",
+    launchDate: "Q2 2026", completionDate: "Q1 2029",
+    projectStatus: "By BUC", isIvt: null, viewNum: 2363,
+    propertyGroup: "D25 - D28",
+  },
+  {
+    projectId: "1d786deac0d542aeaf0df08a28f98799",
+    projectName: "Abbey Row, Liverpool",
+    abbreviation: "Abbey-Row-Liverpool",
+    projectType: "Residential Highrise",
+    streetAddress: "33 Devon Street, Liverpool L3 8HA",
+    location: "Liverpool, UK",
+    district: "",
+    mainImage: "/upload/broke/f977fb7981d84fcda6922f623f18c445/1d786deac0d542aeaf0df08a28f98799/imgs/20260109/d0f783a138ef4d278f2599979a1dc085.jpeg",
+    priceFromText: "179,950", psfFromText: "364", currencySymbol: "£",
+    launchDate: "TBC", completionDate: "Q4 2028",
+    projectStatus: "By BUC", isIvt: null, viewNum: 281,
+    propertyGroup: "Overseas Project - UK",
+  },
+  {
+    projectId: "030fee210b074a86a512f1f6cfaf62b6",
+    projectName: "Narra Residences 翠岚轩",
+    abbreviation: "Narra-Residences",
+    projectType: "Residential Development",
+    streetAddress: "50–64 Dairy Farm Walk",
+    location: "D23 - Bukit Batok / Bukit Panjang",
+    district: "D23",
+    mainImage: "/upload/broke/1557b87be48b40c491095353fd85307c/030fee210b074a86a512f1f6cfaf62b6/imgs/20251201/f1122146a2ff4db988df236d91b743d5.jpg",
+    priceFromText: "1,227,000", psfFromText: "2,021", currencySymbol: "$",
+    launchDate: "2026-01-31 00:00:00", completionDate: "Q1 2029",
+    projectStatus: "By BUC", isIvt: 1, viewNum: 35891,
+    propertyGroup: "D22 - D24",
+  },
+  {
+    projectId: "89abbcafcb6d4b85a543d4131a5148fb",
+    projectName: "Newport Residences 铂海峰",
+    abbreviation: "Newport-Residences",
+    projectType: "Mixed Development",
+    streetAddress: "80 Anson Road",
+    location: "D02 - Chinatown / Tanjong Pagar",
+    district: "D02",
+    mainImage: "/upload/broke/2029c11d79004b5e915809fbd6e19f7b/89abbcafcb6d4b85a543d4131a5148fb/imgs/20230411/a24884135edb4518b1e9d789c93e2617.jpeg",
+    priceFromText: "1,359,000", psfFromText: "2,757", currencySymbol: "$",
+    launchDate: "2026-01-31 00:00:00", completionDate: "Q2 2027",
+    projectStatus: "By BUC", isIvt: 1, viewNum: 89276,
+    propertyGroup: "D01 - D08",
+  },
+  {
+    projectId: "cf7d4684ea39448697222b2a7d7aeab6",
+    projectName: "Vela Bay 首航",
+    abbreviation: "Vela-Bay",
+    projectType: "Residential",
+    streetAddress: "Bayshore Road",
+    location: "D16 - Bedok / Upper East Coast",
+    district: "D16",
+    mainImage: "/upload/broke/25aa2d2624f54406b900cca81ccb30ae/cf7d4684ea39448697222b2a7d7aeab6/imgs/20260204/b26a7a62cc834627b3690c22f1a33579.PNG",
+    priceFromText: null, psfFromText: null, currencySymbol: "$",
+    launchDate: "TBC", completionDate: "TBC",
+    projectStatus: "By BUC", isIvt: null, viewNum: 4577,
+    propertyGroup: "D15 - D18",
+  },
+  {
+    projectId: "60dab94999134e819496275b30b239aa",
+    projectName: "Coastal Cabana",
+    abbreviation: "Coastal-Cabana",
+    projectType: "Executive Condominium",
+    streetAddress: "Jalan Loyang Besar",
+    location: "D17 - Loyang / Changi",
+    district: "D17",
+    mainImage: "/upload/broke/25aa2d2624f54406b900cca81ccb30ae/60dab94999134e819496275b30b239aa/imgs/20260106/a6f2fd5acf414438ab5088005b9b81c6.jpg",
+    priceFromText: "1,505,000", psfFromText: "1,672", currencySymbol: "$",
+    launchDate: "2026-01-17 00:00:00", completionDate: "2029-03-31 00:00:00",
+    projectStatus: "By BUC", isIvt: 1, viewNum: 44853,
+    propertyGroup: "D15 - D18",
+  },
+  {
+    projectId: "47f82c749a9c47bbb84d8d1953f08d45",
+    projectName: "The Giverny Residences",
+    abbreviation: "The-Giverny-Residences",
+    projectType: "Residential Flat",
+    streetAddress: "6 Robin Drive",
+    location: "D10 - Tanglin / Holland",
+    district: "D10",
+    mainImage: "/upload/broke/23f846311ee04507bc9f36b7ab89fb86/47f82c749a9c47bbb84d8d1953f08d45/imgs/20230324/3fd969aa3f9e4244869ce2ef4c56b80a.jpeg",
+    priceFromText: "5,497,000", psfFromText: "3,190", currencySymbol: "$",
+    launchDate: "2025-12-22 00:00:00", completionDate: "13 Feb 2026",
+    projectStatus: "TOP soon", isIvt: 1, viewNum: 24454,
+    propertyGroup: "D09, D10, D11, D21",
+  },
+  {
+    projectId: "70b9d30f47f5447da1d5c4252439fd26",
+    projectName: "The Sen",
+    abbreviation: "The-Sen",
+    projectType: "Residential Lowrise",
+    streetAddress: "222–230 Jalan Jurong Kechil",
+    location: "D21 - Clementi / Upper Bukit Timah",
+    district: "D21",
+    mainImage: "/upload/broke/25aa2d2624f54406b900cca81ccb30ae/70b9d30f47f5447da1d5c4252439fd26/imgs/20250904/000b52d4e0a3462d98a040fd64cd70b5.jpg",
+    priceFromText: "1,515,000", psfFromText: "2,235", currencySymbol: "$",
+    launchDate: "2025-11-08 00:00:00", completionDate: "2030-08-31 00:00:00",
+    projectStatus: "By BUC", isIvt: 1, viewNum: 56313,
+    propertyGroup: "D09, D10, D11, D21",
+  },
+  {
+    projectId: "a92578afb30f481ea19b4bf48fffb96b",
+    projectName: "Zyon Grand 卓悦峰",
+    abbreviation: "Zion-Grand",
+    projectType: "Mixed Developments",
+    streetAddress: "3, 5 Kim Seng Road",
+    location: "D03 - Alexandra / Commonwealth",
+    district: "D03",
+    mainImage: "/upload/broke/2029c11d79004b5e915809fbd6e19f7b/a92578afb30f481ea19b4bf48fffb96b/imgs/20250725/5de223a007e84aecb23c0f283ca26c22.jpeg",
+    priceFromText: "1,450,000", psfFromText: "3,059", currencySymbol: "$",
+    launchDate: "2025-10-25 00:00:00", completionDate: "2032-09-30 00:00:00",
+    projectStatus: "By BUC", isIvt: 1, viewNum: 117414,
+    propertyGroup: "D01 - D08",
+  },
+  {
+    projectId: "946c32a7bc3c43f6b1df4513a33d371e",
+    projectName: "Faber Residence",
+    abbreviation: "Faber-Residence",
+    projectType: "5 Storey Development",
+    streetAddress: "54–70 Faber Walk",
+    location: "D05 - Buona Vista / West Coast",
+    district: "D05",
+    mainImage: "/upload/broke/25aa2d2624f54406b900cca81ccb30ae/946c32a7bc3c43f6b1df4513a33d371e/imgs/20250922/60e9ddb427fe480da8e41827e2af0fd4.jpeg",
+    priceFromText: "2,601,000", psfFromText: "2,153", currencySymbol: "$",
+    launchDate: "2025-10-18 00:00:00", completionDate: "1Q 2029",
+    projectStatus: "By BUC", isIvt: 1, viewNum: 60831,
+    propertyGroup: "D01 - D08",
+  },
+];
 
-const FOR_SALE_ID = 'b15c1ab6-4adc-46c0-9643-9f96921e83b6';
-const SOLD_ID = 'f21d8d41-09ce-4527-9d2a-3bd83a8643c6';
+const AGENT_CODE  = "R006429J";
+const VNK         = "28df66df";
+const IMAGE_BASE  = "https://img.singmap.com";
+const WHATSAPP_NO = "6588383836";
+const DETAIL_URL  = (abbr) => `https://share.ecoprop.com/${AGENT_CODE}/${abbr}?VNK=${VNK}`;
 
-export default function Block() {
-  const [activeTab, setActiveTab] = useState('for-sale');
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
-  
-  const title = useTextSetting({
-    name: 'title',
-    label: 'Title',
-    initialValue: 'Property Listings',
-  });
-  
-  const subtitle = useTextSetting({
-    name: 'subtitle',
-    label: 'Subtitle',
-    initialValue: 'Browse our current and sold properties',
-  });
+const TABS = [
+  { key: "all",      label: "All" },
+  { key: "sg",       label: "Singapore" },
+  { key: "overseas", label: "Overseas" },
+  { key: "ec",       label: "EC" },
+  { key: "mixed",    label: "Mixed Dev" },
+  { key: "top",      label: "TOP Soon" },
+];
 
-  const { data: forSaleData, status: forSaleStatus } = useRecords({
-    select,
-    where: q.array('status').hasAllOf([FOR_SALE_ID]),
-    count: 50,
-  });
+// ─── helpers ─────────────────────────────────────────────────────────────────
+function imgSrc(path) {
+  if (!path) return null;
+  if (path.startsWith("http")) return path;
+  return IMAGE_BASE + path;
+}
+function fmtDate(val) {
+  if (!val || val === "TBC") return "TBC";
+  if (!/^\d{4}-/.test(val)) return val;
+  const d = new Date(val);
+  return isNaN(d) ? val : d.toLocaleDateString("en-SG", { year: "numeric", month: "short" });
+}
+function isOverseas(loc) { return loc && !loc.startsWith("D"); }
 
-  const { data: soldData, status: soldStatus } = useRecords({
-    select,
-    where: q.array('status').hasAllOf([SOLD_ID]),
-    count: 50,
-  });
+// ─── styles ──────────────────────────────────────────────────────────────────
+const css = `
+@import url('https://fonts.googleapis.com/css2?family=Rethink+Sans:wght@400;500;600;700&display=swap');
 
-  const forSaleItems = forSaleData?.pages.flatMap((page) => page.items) || [];
-  const soldItems = soldData?.pages.flatMap((page) => page.items) || [];
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  const PropertyCard = ({ item, isSold }: { item: any; isSold: boolean }) => {
-    const imageUrl = Array.isArray(item.fields.picture)
-      ? item.fields.picture[0]?.url
-      : item.fields.picture?.url;
+.ep-root {
+  font-family: 'Rethink Sans', sans-serif;
+  background: hsl(0 0% 98%);
+  min-height: 100vh;
+  color: hsl(224 71% 4%);
+  --radius: 0.75rem;
+  --border: hsl(214 32% 91%);
+  --muted: hsl(210 40% 96%);
+  --muted-fg: hsl(215 16% 47%);
+  --primary: hsl(222 47% 11%);
+  --primary-fg: hsl(210 40% 98%);
+  --green: hsl(142 72% 29%);
+  --green-hover: hsl(142 72% 24%);
+  --destructive: hsl(0 72% 51%);
+  --card: hsl(0 0% 100%);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.10), 0 10px 10px -5px rgba(0,0,0,0.04);
+}
 
-    const handleWhatsAppClick = () => {
-      const message = encodeURIComponent(`Hi, I'm interested in the property: ${item.fields.name || 'Property Listing'}`);
-      window.open(`https://wa.me/6588383836?text=${message}`, '_blank');
-    };
+/* ── header ── */
+.ep-header {
+  text-align: center;
+  padding: 48px 24px 36px;
+  animation: fadeDown 0.6s ease both;
+}
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ep-header h1 {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+.ep-header p {
+  font-size: 1rem;
+  color: var(--muted-fg);
+  font-weight: 400;
+}
 
-    return (
-      <Card 
-        className={`overflow-hidden transition-all duration-300 hover:shadow-2xl ${
-          isSold ? 'opacity-75' : 'hover:scale-[1.02]'
-        }`}
-        onMouseEnter={() => setHoveredCard(item.id)}
-        onMouseLeave={() => setHoveredCard(null)}
-      >
-        <div className="relative h-64 bg-muted overflow-hidden group">
-          {imageUrl ? (
-            <>
-              <img
-                src={imageUrl}
-                alt={item.fields.name || 'Property'}
-                className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </>
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-              No image available
-            </div>
-          )}
-          <div className="absolute top-3 right-3 animate-in fade-in slide-in-from-top-2 duration-500">
-            <Badge
-              variant={isSold ? 'destructive' : 'default'}
-              className={`${isSold ? '' : 'bg-primary'} shadow-lg`}
-            >
-              {isSold ? 'Sold' : 'For Sale'}
-            </Badge>
-          </div>
-          {!isSold && hoveredCard === item.id && (
-            <div className="absolute bottom-4 left-4 right-4 animate-in slide-in-from-bottom-4 duration-300">
-              <Button
-                onClick={handleWhatsAppClick}
-                className="w-full bg-green-600 hover:bg-green-700 text-black shadow-lg"
-                size="lg"
-              >
-                <MessageCircle className="mr-2 h-5 w-5" />
-                Inquire on WhatsApp
-              </Button>
-            </div>
-          )}
-        </div>
-        <CardHeader>
-          <CardTitle className="text-xl transition-colors duration-300 group-hover:text-primary">{item.fields.name || 'Untitled Property'}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {item.fields.landSize && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect width="18" height="18" x="3" y="3" rx="2" />
-              </svg>
-              <span>{item.fields.landSize.toLocaleString()} sq ft</span>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    );
+/* ── tabs ── */
+.ep-tabs-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
+  padding: 0 24px;
+}
+.ep-tabs {
+  display: inline-flex;
+  background: var(--muted);
+  border-radius: var(--radius);
+  padding: 4px;
+  gap: 2px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.ep-tab {
+  padding: 7px 16px;
+  border-radius: calc(var(--radius) - 2px);
+  border: none;
+  background: transparent;
+  font-family: 'Rethink Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--muted-fg);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.ep-tab:hover { color: var(--primary); }
+.ep-tab.active {
+  background: white;
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── grid ── */
+.ep-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+.ep-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+/* ── card ── */
+.ep-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  animation: fadeUp 0.5s ease both;
+}
+.ep-card:hover {
+  box-shadow: var(--shadow-xl);
+  transform: scale(1.015);
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* image zone */
+.ep-img-zone {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  background: var(--muted);
+}
+.ep-img-zone img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.ep-card:hover .ep-img-zone img { transform: scale(1.05); }
+.ep-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.ep-card:hover .ep-img-overlay { opacity: 1; }
+.ep-no-img {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted-fg); font-size: 0.85rem;
+}
+
+/* badge */
+.ep-badge-wrap {
+  position: absolute;
+  top: 10px; right: 10px;
+  display: flex; gap: 5px;
+}
+.ep-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 9999px;
+}
+.badge-default    { background: var(--primary); color: var(--primary-fg); }
+.badge-top        { background: hsl(142 72% 29%); color: white; }
+.badge-ivt        { background: hsl(38 92% 50%); color: hsl(38 92% 12%); }
+.badge-overseas   { background: hsl(221 83% 53%); color: white; }
+
+/* whatsapp hover btn */
+.ep-wa-wrap {
+  position: absolute;
+  bottom: 14px; left: 12px; right: 12px;
+  transform: translateY(8px);
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.ep-card:hover .ep-wa-wrap {
+  opacity: 1;
+  transform: translateY(0);
+}
+.ep-wa-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: calc(var(--radius) - 2px);
+  border: none;
+  background: var(--green);
+  color: white;
+  font-family: 'Rethink Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: background 0.18s;
+}
+.ep-wa-btn:hover { background: var(--green-hover); }
+
+/* card body */
+.ep-card-header {
+  padding: 16px 16px 4px;
+}
+.ep-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.ep-card-content {
+  padding: 6px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ep-card-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--muted-fg);
+}
+.ep-card-meta-row svg { flex-shrink: 0; }
+
+.ep-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}
+.ep-price {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+}
+.ep-psf {
+  font-size: 0.75rem;
+  color: var(--muted-fg);
+  margin-top: 1px;
+}
+.ep-price-poa {
+  font-size: 0.82rem;
+  color: var(--muted-fg);
+  font-style: italic;
+}
+
+.ep-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  margin-top: 6px;
+}
+.ep-meta-item { display: flex; flex-direction: column; gap: 1px; }
+.ep-meta-lbl {
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: hsl(214 32% 75%);
+}
+.ep-meta-val { font-size: 0.78rem; color: hsl(215 25% 27%); }
+
+.ep-card-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+.ep-detail-btn {
+  display: block;
+  width: 100%;
+  padding: 9px;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--primary);
+  font-family: 'Rethink Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.18s, border-color 0.18s;
+}
+.ep-detail-btn:hover { background: var(--muted); border-color: hsl(214 32% 80%); }
+
+/* empty */
+.ep-empty {
+  text-align: center;
+  padding: 64px 0;
+  color: var(--muted-fg);
+  font-size: 0.9rem;
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .ep-grid { grid-template-columns: 1fr; }
+  .ep-header { padding: 32px 16px 24px; }
+}
+`;
+
+// ─── WhatsApp icon ────────────────────────────────────────────────────────────
+const WAIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+);
+const MapPin = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+    <circle cx="12" cy="9" r="2.5"/>
+  </svg>
+);
+const BuildingIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>
+  </svg>
+);
+
+// ─── property card ────────────────────────────────────────────────────────────
+function PropertyCard({ prop, idx }) {
+  const img      = imgSrc(prop.mainImage);
+  const overseas = isOverseas(prop.location);
+  const isTop    = prop.projectStatus === "TOP soon";
+  const sym      = prop.currencySymbol || "$";
+  const addr     = (prop.streetAddress || "").replace(/\n/g, ", ").trim();
+
+  const handleWhatsApp = () => {
+    const msg = encodeURIComponent(`Hi, I'm interested in the property: ${prop.projectName}`);
+    window.open(`https://wa.me/${WHATSAPP_NO}?text=${msg}`, "_blank");
   };
 
   return (
-    <div className="container py-12">
-      <div className="content">
-        <div className="text-center mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
-          <h1 className="text-4xl font-bold mb-3">{title}</h1>
-          <p className="text-lg text-muted-foreground">{subtitle}</p>
+    <div className="ep-card" style={{ animationDelay: `${Math.min(idx * 50, 500)}ms` }}>
+
+      {/* IMAGE */}
+      <div className="ep-img-zone">
+        {img
+          ? <img src={img} alt={prop.projectName} loading="lazy" />
+          : <div className="ep-no-img">No image available</div>
+        }
+        <div className="ep-img-overlay" />
+
+        {/* badges */}
+        <div className="ep-badge-wrap">
+          {isTop
+            ? <span className="ep-badge badge-top">TOP Soon</span>
+            : <span className="ep-badge badge-default">{prop.projectStatus}</span>
+          }
+          {prop.isIvt === 1 && <span className="ep-badge badge-ivt">⭐ Pick</span>}
+          {overseas         && <span className="ep-badge badge-overseas">Overseas</span>}
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
-            <TabsTrigger value="for-sale" className="transition-all duration-300">
-              For Sale ({forSaleItems.length})
-            </TabsTrigger>
-            <TabsTrigger value="sold" className="transition-all duration-300">
-              Sold ({soldItems.length})
-            </TabsTrigger>
-          </TabsList>
+        {/* WhatsApp hover button */}
+        <div className="ep-wa-wrap">
+          <button className="ep-wa-btn" onClick={handleWhatsApp}>
+            <WAIcon /> Enquire on WhatsApp
+          </button>
+        </div>
+      </div>
 
-          <TabsContent value="for-sale" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {forSaleStatus === 'pending' ? (
-              <div className="text-center py-12 text-muted-foreground">
-                Loading properties...
-              </div>
-            ) : forSaleStatus === 'error' ? (
-              <div className="text-center py-12 text-destructive">
-                Error loading properties
-              </div>
-            ) : forSaleItems.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                No properties for sale at the moment
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {forSaleItems.map((item) => (
-                  <PropertyCard key={item.id} item={item} isSold={false} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
+      {/* HEADER */}
+      <div className="ep-card-header">
+        <div className="ep-card-title">{prop.projectName}</div>
+      </div>
 
-          <TabsContent value="sold" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {soldStatus === 'pending' ? (
-              <div className="text-center py-12 text-muted-foreground">
-                Loading properties...
-              </div>
-            ) : soldStatus === 'error' ? (
-              <div className="text-center py-12 text-destructive">
-                Error loading properties
-              </div>
-            ) : soldItems.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                No sold properties to display
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {soldItems.map((item) => (
-                  <PropertyCard key={item.id} item={item} isSold={true} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+      {/* CONTENT */}
+      <div className="ep-card-content">
+        {addr && (
+          <div className="ep-card-meta-row">
+            <MapPin />
+            <span>{addr.length > 60 ? addr.slice(0, 60) + "…" : addr}</span>
+          </div>
+        )}
+        <div className="ep-card-meta-row">
+          <BuildingIcon />
+          <span>{prop.projectType}</span>
+        </div>
+
+        <div className="ep-divider" />
+
+        {prop.priceFromText
+          ? <>
+              <div className="ep-price">{sym}{prop.priceFromText}+</div>
+              {prop.psfFromText && (
+                <div className="ep-psf">From {sym}{prop.psfFromText} psf</div>
+              )}
+            </>
+          : <div className="ep-price-poa">Price on application</div>
+        }
+
+        <div className="ep-meta-grid">
+          <div className="ep-meta-item">
+            <span className="ep-meta-lbl">Launch</span>
+            <span className="ep-meta-val">{fmtDate(prop.launchDate)}</span>
+          </div>
+          <div className="ep-meta-item">
+            <span className="ep-meta-lbl">Completion</span>
+            <span className="ep-meta-val">{fmtDate(prop.completionDate)}</span>
+          </div>
+          <div className="ep-meta-item" style={{ gridColumn: "1/-1" }}>
+            <span className="ep-meta-lbl">Location</span>
+            <span className="ep-meta-val">{prop.location || "—"}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* FOOTER */}
+      <div className="ep-card-footer">
+        <a
+          className="ep-detail-btn"
+          href={DETAIL_URL(prop.abbreviation)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View Full Listing →
+        </a>
       </div>
     </div>
+  );
+}
+
+// ─── main ─────────────────────────────────────────────────────────────────────
+export default function Block() {
+  const [activeTab, setActiveTab] = useState("all");
+
+  const filtered = LISTINGS.filter(p => {
+    const type = (p.projectType || "").toLowerCase();
+    if (activeTab === "all")      return true;
+    if (activeTab === "sg")       return !isOverseas(p.location);
+    if (activeTab === "overseas") return isOverseas(p.location);
+    if (activeTab === "ec")       return type.includes("executive");
+    if (activeTab === "mixed")    return type.includes("mixed");
+    if (activeTab === "top")      return p.projectStatus === "TOP soon";
+    return true;
+  });
+
+  return (
+    <>
+      <style>{css}</style>
+      <div className="ep-root">
+
+        {/* HEADER */}
+        <div className="ep-header">
+          <h1>Property Listings</h1>
+          <p>Browse our current new launch projects across Singapore &amp; overseas</p>
+        </div>
+
+        {/* TABS */}
+        <div className="ep-tabs-wrap">
+          <div className="ep-tabs">
+            {TABS.map(t => (
+              <button
+                key={t.key}
+                className={`ep-tab ${activeTab === t.key ? "active" : ""}`}
+                onClick={() => setActiveTab(t.key)}
+              >
+                {t.label}
+                {t.key === "all"
+                  ? ` (${LISTINGS.length})`
+                  : activeTab === t.key
+                    ? ` (${filtered.length})`
+                    : ""}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* GRID */}
+        <div className="ep-container">
+          <div className="ep-grid">
+            {filtered.length > 0
+              ? filtered.map((prop, i) => (
+                  <PropertyCard key={prop.projectId} prop={prop} idx={i} />
+                ))
+              : <div className="ep-empty">No listings match this filter.</div>
+            }
+          </div>
+        </div>
+
+      </div>
+    </>
   );
 }
