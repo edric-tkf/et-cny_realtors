@@ -55,7 +55,7 @@ export default function Block() {
 
     const handleWhatsAppClick = () => {
       const message = encodeURIComponent(`Hi, I'm interested in the property: ${item.fields.name || 'Property Listing'}`);
-      window.open(`https://wa.me/6598515000?text=${message}`, '_blank');
+      window.open(`https://wa.me/6588383836?text=${message}`, '_blank');
     };
 
     return (
