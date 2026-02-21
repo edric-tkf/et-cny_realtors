@@ -1,0 +1,129 @@
+import { useRecords, q } from "@/lib/datasource";
+import { useTextSetting } from "@/lib/editable-settings";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Quote } from "lucide-react";
+
+const select = q.select({
+  name: "8SXk1",
+  description: "lQHki",
+  houseBought: "4wfKS",
+  picture: "3JVFj",
+});
+
+export default function Block() {
+  const title = useTextSetting({
+    name: "title",
+    label: "Section Title",
+    initialValue: "What Our Clients Say",
+  });
+
+  const subtitle = useTextSetting({
+    name: "subtitle",
+    label: "Section Subtitle",
+    initialValue: "Trusted by homeowners who found their dream properties",
+  });
+
+  const {
+    data,
+    status,
+    error,
+    hasNextPage,
+    fetchNextPage,
+    isFetching,
+    isFetchingNextPage
+  } = useRecords({ 
+    select,
+    count: 6 
+  });
+
+  const items = data?.pages.flatMap(page => page.items) || [];
+
+  return (
+    <div className="container py-16 md:py-24">
+      <div className="content">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+            {title}
+          </h2>
+          <p className="text-lg text-muted-foreground">
+            {subtitle}
+          </p>
+        </div>
+
+        {status === "pending" && (
+          <div className="text-center py-12">
+            <div className="text-muted-foreground">Loading testimonials...</div>
+          </div>
+        )}
+
+        {status === "error" && (
+          <div className="text-center py-12">
+            <div className="text-destructive">Error loading testimonials</div>
+          </div>
+        )}
+
+        {status === "success" && (
+          <>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {items.map((item) => {
+                const pictureUrl = Array.isArray(item.fields.picture) 
+                  ? item.fields.picture[0]?.url 
+                  : item.fields.picture?.url;
+                const pictureName = item.fields.name || "Client";
+
+                return (
+                  <Card 
+                    key={item.id} 
+                    className="border-border hover:shadow-lg transition-shadow duration-300"
+                  >
+                    <CardContent className="p-8">
+                      <Quote className="w-10 h-10 text-primary mb-6 opacity-50" />
+                      
+                      <p className="text-foreground leading-relaxed mb-8 text-base">
+                        {item.fields.description || "No testimonial provided"}
+                      </p>
+
+                      <div className="flex items-center gap-4 pt-6 border-t border-border">
+                        {pictureUrl && (
+                          <img
+                            src={pictureUrl}
+                            alt={pictureName}
+                            className="w-14 h-14 rounded-full object-cover ring-2 ring-primary/10"
+                          />
+                        )}
+                        <div>
+                          <h4 className="font-semibold text-foreground">
+                            {item.fields.name || "Anonymous"}
+                          </h4>
+                          {item.fields.houseBought && (
+                            <p className="text-sm text-muted-foreground">
+                              {item.fields.houseBought}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {hasNextPage && (
+              <div className="text-center mt-12">
+                <Button 
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetching}
+                  variant="outline"
+                  size="lg"
+                >
+                  {isFetchingNextPage ? "Loading..." : "Load More Testimonials"}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
